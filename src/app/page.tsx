@@ -210,6 +210,8 @@ export default function VideoPlayerPage() {
                   ref={videoRef}
                   key={selectedMovie.id} 
                   controls 
+                  controlsList="nodownload"
+                  onContextMenu={(e) => e.preventDefault()}
                   tabIndex={0}
                   className="w-full h-auto max-h-[75vh] object-contain aspect-video bg-gray-950 focus:outline-none focus:ring-4 focus:ring-blue-500"
                   autoPlay
