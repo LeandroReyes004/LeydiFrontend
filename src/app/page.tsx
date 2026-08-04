@@ -35,10 +35,14 @@ export default function VideoPlayerPage() {
           });
           setItems(sortedData);
           
-          // Buscar una imagen llamada "portada" en la carpeta actual
-          const coverImage = sortedData.find((item: any) => 
-            item.mimeType?.startsWith('image/') && item.name.toLowerCase().includes('portada')
-          );
+          // Buscar una imagen llamada "portada" (jpg, png, webp, etc.) en la carpeta actual
+          const coverImage = sortedData.find((item: any) => {
+            const isImage = item.mimeType?.startsWith('image/') || 
+                            item.name.toLowerCase().endsWith('.webp') || 
+                            item.name.toLowerCase().endsWith('.jpg') || 
+                            item.name.toLowerCase().endsWith('.png');
+            return isImage && item.name.toLowerCase().includes('portada');
+          });
 
           if (coverImage) {
             // Si hay portada, la usamos. El nombre será el de la carpeta actual o Cine Privado
@@ -53,11 +57,15 @@ export default function VideoPlayerPage() {
             });
           } else {
             // Fallback: Seleccionar película destacada para la portada
-            const moviesWithThumb = sortedData.filter((item: any) => 
-              item.mimeType !== 'application/vnd.google-apps.folder' && 
-              !item.mimeType?.startsWith('image/') && 
-              item.thumbnailLink
-            );
+            const moviesWithThumb = sortedData.filter((item: any) => {
+              const isItemImage = item.mimeType?.startsWith('image/') || 
+                                  item.name.toLowerCase().endsWith('.webp') || 
+                                  item.name.toLowerCase().endsWith('.jpg') || 
+                                  item.name.toLowerCase().endsWith('.png');
+              return item.mimeType !== 'application/vnd.google-apps.folder' && 
+                     !isItemImage && 
+                     item.thumbnailLink;
+            });
             
             if (moviesWithThumb.length > 0) {
               const randomIndex = Math.floor(Math.random() * moviesWithThumb.length);
