@@ -133,11 +133,29 @@ export default function VideoPlayerPage() {
 
   const folders = filteredItems.filter(item => item.mimeType === 'application/vnd.google-apps.folder');
   
-  // Excluimos la imagen de "portada" para que no aparezca en la lista de películas
-  const files = filteredItems.filter(item => 
-    item.mimeType !== 'application/vnd.google-apps.folder' && 
-    !item.name.toLowerCase().includes('portada')
-  );
+  // Filtramos los archivos para no mostrar: 
+  // 1. Carpetas
+  // 2. La imagen de "portada"
+  // 3. Imágenes que se usan como carátula de una carpeta
+  // 4. Imágenes que se usan como carátula de una película
+  const files = filteredItems.filter(item => {
+    if (item.mimeType === 'application/vnd.google-apps.folder') return false;
+    if (item.name.toLowerCase().includes('portada')) return false;
+
+    // ¿Es esta imagen la carátula de alguna carpeta?
+    const isFolderCover = folders.some(f => f.name === item.name.replace(/\.[^/.]+$/, ""));
+    if (isFolderCover) return false;
+
+    // ¿Es esta imagen la carátula de alguna película?
+    const isMovieCover = filteredItems.some(movie => 
+      movie.mimeType?.startsWith('video/') && 
+      movie.name.replace(/\.[^/.]+$/, "") === item.name.replace(/\.[^/.]+$/, "")
+    );
+    // Si es imagen y coincide con una peli, la ocultamos de la lista
+    if (isMovieCover && item.mimeType?.startsWith('image/')) return false;
+
+    return true;
+  });
 
   return (
     <>
@@ -235,19 +253,35 @@ export default function VideoPlayerPage() {
                   )}
                 </div>
                 <div className="row-container">
-                  {folders.map(item => (
-                    <button
-                      key={item.id}
-                      onClick={() => handleItemClick(item)}
-                      className="card"
-                      title={item.name}
-                    >
-                      <div className="card-icon">📁</div>
-                      <div className="card-info">
-                        <p className="card-title">{item.name}</p>
-                      </div>
-                    </button>
-                  ))}
+                  {folders.map((folder: any) => {
+                    // Buscar si hay una imagen con el mismo nombre que la carpeta
+                    const folderCover = items.find(i => 
+                      i.mimeType !== 'application/vnd.google-apps.folder' && 
+                      i.name.replace(/\.[^/.]+$/, "") === folder.name
+                    );
+                    
+                    return (
+                      <button
+                        key={folder.id}
+                        onClick={() => handleItemClick(folder)}
+                        className="card"
+                        title={folder.name}
+                      >
+                        {folderCover ? (
+                          <img 
+                            src={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/stream/${folderCover.id}`} 
+                            alt={folder.name} 
+                            className="card-image"
+                          />
+                        ) : (
+                          <div className="card-icon">📁</div>
+                        )}
+                        <div className="card-info">
+                          <p className="card-title">{folder.name}</p>
+                        </div>
+                      </button>
+                    )
+                  })}
                 </div>
               </section>
             )}
@@ -266,19 +300,31 @@ export default function VideoPlayerPage() {
                 </div>
                 {/* Usamos flex-wrap para que las pelis caigan en múltiples líneas (estilo grid) */}
                 <div className="row-container" style={{ flexWrap: 'wrap', gap: '20px' }}>
-                  {files.map(item => {
-                    const isSelected = selectedMovie?.id === item.id;
+                  {files.map((file: any) => {
+                    // Si este archivo es un video, buscamos si tiene una imagen con el mismo nombre
+                    const movieCover = items.find(i => 
+                      i.mimeType?.startsWith('image/') && 
+                      i.name.replace(/\.[^/.]+$/, "") === file.name.replace(/\.[^/.]+$/, "")
+                    );
+                    const isSelected = selectedMovie?.id === file.id;
+
                     return (
                       <button
-                        key={item.id}
-                        onClick={() => handleItemClick(item)}
+                        key={file.id}
+                        onClick={() => handleItemClick(file)}
                         className={`card ${isSelected ? 'selected' : ''}`}
-                        title={item.name}
+                        title={file.name}
                       >
-                        {item.thumbnailLink ? (
+                        {movieCover ? (
                           <img 
-                            src={item.thumbnailLink} 
-                            alt={item.name} 
+                            src={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/stream/${movieCover.id}`} 
+                            alt={file.name} 
+                            className="card-image"
+                          />
+                        ) : file.thumbnailLink ? (
+                          <img 
+                            src={file.thumbnailLink} 
+                            alt={file.name} 
                             className="card-image"
                             referrerPolicy="no-referrer"
                           />
@@ -286,9 +332,9 @@ export default function VideoPlayerPage() {
                           <div className="card-icon">🎥</div>
                         )}
                         <div className="card-info">
-                          <p className="card-title">{item.name}</p>
+                          <p className="card-title">{file.name.replace(/\.[^/.]+$/, "")}</p>
                           <p className="card-subtitle">
-                            {(parseInt(item.size) / (1024 * 1024 * 1024)).toFixed(2)} GB
+                            {(parseInt(file.size) / (1024 * 1024 * 1024)).toFixed(2)} GB
                           </p>
                         </div>
                       </button>
