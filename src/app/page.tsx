@@ -35,13 +35,11 @@ export default function VideoPlayerPage() {
           });
           setItems(sortedData);
           
-          // Buscar una imagen llamada "portada" (jpg, png, webp, etc.) en la carpeta actual
+          // Buscar una imagen llamada "portada" en la carpeta actual
+          // Simplificamos la búsqueda: si no es carpeta y se llama portada, asumimos que es la imagen.
           const coverImage = sortedData.find((item: any) => {
-            const isImage = item.mimeType?.startsWith('image/') || 
-                            item.name.toLowerCase().endsWith('.webp') || 
-                            item.name.toLowerCase().endsWith('.jpg') || 
-                            item.name.toLowerCase().endsWith('.png');
-            return isImage && item.name.toLowerCase().includes('portada');
+            return item.mimeType !== 'application/vnd.google-apps.folder' && 
+                   item.name.toLowerCase().includes('portada');
           });
 
           if (coverImage) {
@@ -52,6 +50,7 @@ export default function VideoPlayerPage() {
               
             setFeaturedMovie({
               isCoverOnly: true,
+              id: coverImage.id, // Guardamos el ID para usar el stream original en máxima calidad
               name: currentFolderName,
               thumbnailLink: coverImage.thumbnailLink,
             });
@@ -179,7 +178,13 @@ export default function VideoPlayerPage() {
       ) : featuredMovie ? (
         <div 
           className="hero-featured"
-          style={{ backgroundImage: `url(${featuredMovie.thumbnailLink.replace('=s220', '=s1000')})` }}
+          style={{ 
+            backgroundImage: `url(${
+              featuredMovie.isCoverOnly 
+                ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/stream/${featuredMovie.id}`
+                : (featuredMovie.thumbnailLink ? featuredMovie.thumbnailLink.replace('=s220', '=s1000') : '')
+            })` 
+          }}
         >
           <div className="hero-featured-gradient">
             <h1 className="hero-featured-title">{featuredMovie.name}</h1>
