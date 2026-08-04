@@ -11,6 +11,7 @@ export default function VideoPlayerPage() {
   
   const [items, setItems] = useState<any[]>([]);
   const [selectedMovie, setSelectedMovie] = useState<any | null>(null);
+  const [featuredMovie, setFeaturedMovie] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   
@@ -33,6 +34,16 @@ export default function VideoPlayerPage() {
             return a.name.localeCompare(b.name);
           });
           setItems(sortedData);
+          
+          // Seleccionar película destacada para la portada
+          const moviesWithThumb = sortedData.filter((item: any) => item.mimeType !== 'application/vnd.google-apps.folder' && item.thumbnailLink);
+          if (moviesWithThumb.length > 0) {
+            const randomIndex = Math.floor(Math.random() * moviesWithThumb.length);
+            setFeaturedMovie(moviesWithThumb[randomIndex]);
+          } else {
+            setFeaturedMovie(null);
+          }
+
           setLoading(false);
         })
         .catch((err) => {
@@ -127,6 +138,20 @@ export default function VideoPlayerPage() {
           <div className="hero-info">
             <h1 className="hero-title">{selectedMovie.name}</h1>
             <span className="hero-badge">Reproduciendo ahora</span>
+          </div>
+        </div>
+      ) : featuredMovie ? (
+        <div 
+          className="hero-featured"
+          style={{ backgroundImage: `url(${featuredMovie.thumbnailLink.replace('=s220', '=s1000')})` }}
+        >
+          <div className="hero-featured-gradient">
+            <h1 className="hero-featured-title">{featuredMovie.name}</h1>
+            <div className="hero-featured-buttons">
+              <button onClick={() => handleItemClick(featuredMovie)} className="btn-play">
+                ▶ Reproducir
+              </button>
+            </div>
           </div>
         </div>
       ) : (

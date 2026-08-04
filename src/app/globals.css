@@ -125,6 +125,75 @@ body {
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
+/* Featured Hero (Portada) */
+.hero-featured {
+  position: relative;
+  width: 100%;
+  height: 75vh;
+  margin-top: 80px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: flex-end;
+  border-bottom: 1px solid rgba(0, 243, 255, 0.2);
+}
+
+.hero-featured-gradient {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(5, 5, 16, 0.95) 0%,
+    rgba(5, 5, 16, 0.7) 40%,
+    transparent 100%
+  ),
+  linear-gradient(
+    to top,
+    var(--bg-deep) 0%,
+    transparent 20%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 60px;
+}
+
+.hero-featured-title {
+  font-size: 4rem;
+  font-weight: 800;
+  max-width: 60%;
+  line-height: 1.1;
+  margin-bottom: 30px;
+  text-shadow: 0 5px 15px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 243, 255, 0.3);
+}
+
+.hero-featured-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+.btn-play {
+  background: white;
+  color: black;
+  font-size: 1.2rem;
+  font-weight: 700;
+  padding: 12px 30px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.btn-play:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: scale(1.05);
+}
+
 /* Rows Container */
 .main-content {
   padding: 40px;
