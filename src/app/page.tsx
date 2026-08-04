@@ -35,13 +35,36 @@ export default function VideoPlayerPage() {
           });
           setItems(sortedData);
           
-          // Seleccionar película destacada para la portada
-          const moviesWithThumb = sortedData.filter((item: any) => item.mimeType !== 'application/vnd.google-apps.folder' && item.thumbnailLink);
-          if (moviesWithThumb.length > 0) {
-            const randomIndex = Math.floor(Math.random() * moviesWithThumb.length);
-            setFeaturedMovie(moviesWithThumb[randomIndex]);
+          // Buscar una imagen llamada "portada" en la carpeta actual
+          const coverImage = sortedData.find((item: any) => 
+            item.mimeType?.startsWith('image/') && item.name.toLowerCase().includes('portada')
+          );
+
+          if (coverImage) {
+            // Si hay portada, la usamos. El nombre será el de la carpeta actual o Cine Privado
+            const currentFolderName = folderHistory.length > 0 
+              ? folderHistory[folderHistory.length - 1].name 
+              : "Cine Privado";
+              
+            setFeaturedMovie({
+              isCoverOnly: true,
+              name: currentFolderName,
+              thumbnailLink: coverImage.thumbnailLink,
+            });
           } else {
-            setFeaturedMovie(null);
+            // Fallback: Seleccionar película destacada para la portada
+            const moviesWithThumb = sortedData.filter((item: any) => 
+              item.mimeType !== 'application/vnd.google-apps.folder' && 
+              !item.mimeType?.startsWith('image/') && 
+              item.thumbnailLink
+            );
+            
+            if (moviesWithThumb.length > 0) {
+              const randomIndex = Math.floor(Math.random() * moviesWithThumb.length);
+              setFeaturedMovie(moviesWithThumb[randomIndex]);
+            } else {
+              setFeaturedMovie(null);
+            }
           }
 
           setLoading(false);
@@ -102,7 +125,12 @@ export default function VideoPlayerPage() {
   );
 
   const folders = filteredItems.filter(item => item.mimeType === 'application/vnd.google-apps.folder');
-  const files = filteredItems.filter(item => item.mimeType !== 'application/vnd.google-apps.folder');
+  
+  // Excluimos la imagen de "portada" para que no aparezca en la lista de películas
+  const files = filteredItems.filter(item => 
+    item.mimeType !== 'application/vnd.google-apps.folder' && 
+    !item.name.toLowerCase().includes('portada')
+  );
 
   return (
     <>
@@ -147,11 +175,15 @@ export default function VideoPlayerPage() {
         >
           <div className="hero-featured-gradient">
             <h1 className="hero-featured-title">{featuredMovie.name}</h1>
-            <div className="hero-featured-buttons">
-              <button onClick={() => handleItemClick(featuredMovie)} className="btn-play">
-                ▶ Reproducir
-              </button>
-            </div>
+            
+            {/* Solo mostramos el botón de reproducir si es una película real, no si es solo portada */}
+            {!featuredMovie.isCoverOnly && (
+              <div className="hero-featured-buttons">
+                <button onClick={() => handleItemClick(featuredMovie)} className="btn-play">
+                  ▶ Reproducir
+                </button>
+              </div>
+            )}
           </div>
         </div>
       ) : (
