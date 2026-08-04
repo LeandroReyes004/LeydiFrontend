@@ -274,7 +274,9 @@ export default function VideoPlayerPage() {
                             className="card-image"
                           />
                         ) : (
-                          <div className="card-icon">📁</div>
+                          <div className="card-icon virtual-poster">
+                            <span className="virtual-title">{folder.name}</span>
+                          </div>
                         )}
                         <div className="card-info">
                           <p className="card-title">{folder.name}</p>
@@ -329,7 +331,9 @@ export default function VideoPlayerPage() {
                             referrerPolicy="no-referrer"
                           />
                         ) : (
-                          <div className="card-icon">🎥</div>
+                          <div className="card-icon virtual-poster">
+                            <span className="virtual-title">{file.name.replace(/\.[^/.]+$/, "")}</span>
+                          </div>
                         )}
                         <div className="card-info">
                           <p className="card-title">{file.name.replace(/\.[^/.]+$/, "")}</p>
