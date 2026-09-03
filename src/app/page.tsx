@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Hero from '@/components/Hero';
@@ -10,7 +10,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 
 const ROOT_DRIVE_FOLDER_ID = "14cNucDHdxuThs5OuJok_jSgWbzKuS3oA";
 
-export default function VideoPlayerPage() {
+function HomeContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
@@ -272,5 +272,17 @@ export default function VideoPlayerPage() {
 
       <Footer />
     </>
+  );
+}
+
+export default function VideoPlayerPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-surface-container-lowest flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-surface-container-highest border-t-primary-container rounded-full animate-spin"></div>
+      </div>
+    }>
+      <HomeContent />
+    </Suspense>
   );
 }
