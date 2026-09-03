@@ -54,19 +54,17 @@ export default function VideoPlayerPage() {
               thumbnailLink: coverImage.thumbnailLink,
             });
           } else {
-            const moviesWithThumb = sortedData.filter((item: any) => {
+            const candidates = sortedData.filter((item: any) => {
               const isItemImage = item.mimeType?.startsWith('image/') || 
                                   item.name.toLowerCase().endsWith('.webp') || 
                                   item.name.toLowerCase().endsWith('.jpg') || 
                                   item.name.toLowerCase().endsWith('.png');
-              return item.mimeType !== 'application/vnd.google-apps.folder' && 
-                     !isItemImage && 
-                     item.thumbnailLink;
+              return !isItemImage; // Incluye tanto videos como carpetas
             });
             
-            if (moviesWithThumb.length > 0) {
-              const randomIndex = Math.floor(Math.random() * moviesWithThumb.length);
-              setFeaturedMovie(moviesWithThumb[randomIndex]);
+            if (candidates.length > 0) {
+              const randomIndex = Math.floor(Math.random() * candidates.length);
+              setFeaturedMovie(candidates[randomIndex]);
             } else {
               setFeaturedMovie(null);
             }
