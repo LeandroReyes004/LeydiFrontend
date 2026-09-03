@@ -6,11 +6,18 @@ import Footer from '@/components/Footer';
 import Hero from '@/components/Hero';
 import MediaRow from '@/components/MediaRow';
 import MovieDetail from '@/components/MovieDetail';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 const ROOT_DRIVE_FOLDER_ID = "14cNucDHdxuThs5OuJok_jSgWbzKuS3oA";
 
 export default function VideoPlayerPage() {
-  const [currentFolderId, setCurrentFolderId] = useState(ROOT_DRIVE_FOLDER_ID);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  
+  const initialFolderId = searchParams.get('folder') || ROOT_DRIVE_FOLDER_ID;
+  const initialMovieId = searchParams.get('movie');
+
+  const [currentFolderId, setCurrentFolderId] = useState(initialFolderId);
   const [folderHistory, setFolderHistory] = useState<{id: string, name: string}[]>([]);
   
   const [items, setItems] = useState<any[]>([]);
@@ -22,6 +29,18 @@ export default function VideoPlayerPage() {
   const [loading, setLoading] = useState(true);
   
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Si hay un movieId en la URL, intentamos encontrarlo en los items cargados
+  useEffect(() => {
+    if (initialMovieId && items.length > 0 && !selectedMovie) {
+      const movie = items.find(i => i.id === initialMovieId);
+      if (movie) {
+        setSelectedMovie(movie);
+        // Limpiamos la URL para no re-trigger
+        window.history.replaceState({}, '', '/');
+      }
+    }
+  }, [items, initialMovieId, selectedMovie]);
 
   useEffect(() => {
     setLoading(true);

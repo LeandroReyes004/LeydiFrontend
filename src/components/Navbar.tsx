@@ -1,9 +1,20 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/buscar?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.5)]">
       <div className="h-16 w-full px-gutter-desktop flex items-center justify-between gap-space-md">
@@ -18,24 +29,27 @@ export default function Navbar() {
               CINESTREAM
             </span>
           </Link>
-          <nav className="hidden lg:flex items-center gap-space-lg">
-            <Link href="/" className="transition-colors text-primary font-bold">Inicio</Link>
-            <Link href="#" className="font-title-sm text-title-sm text-on-surface-variant hover:text-on-surface transition-colors">Películas</Link>
-            <Link href="#" className="font-title-sm text-title-sm text-on-surface-variant hover:text-on-surface transition-colors">Series</Link>
+          <nav className="hidden md:flex items-center gap-space-lg ml-space-xl">
+            <Link href="/" className="font-title-sm text-title-sm text-on-surface-variant hover:text-on-surface transition-colors">Inicio</Link>
+            <Link href="/peliculas" className="font-title-sm text-title-sm text-on-surface-variant hover:text-on-surface transition-colors">Películas</Link>
+            <Link href="/series" className="font-title-sm text-title-sm text-on-surface-variant hover:text-on-surface transition-colors">Series</Link>
             <Link href="#" className="font-title-sm text-title-sm text-on-surface-variant hover:text-on-surface transition-colors">Novedades</Link>
             <Link href="/mi-lista" className="font-title-sm text-title-sm text-on-surface-variant hover:text-on-surface transition-colors">Mi Lista</Link>
           </nav>
         </div>
         <div className="flex items-center gap-space-md">
           <div className="relative flex items-center">
-            <div className="flex items-center bg-surface-container px-space-sm py-space-xs rounded-full focus-within:ring-1 focus-within:ring-primary transition-all duration-300 w-44 md:w-64">
-              <span className="material-symbols-outlined text-on-surface-variant select-none">search</span>
+            {/* Barra de búsqueda estilo Netflix */}
+            <form onSubmit={handleSearch} className="hidden md:flex items-center relative group">
+              <span className="material-symbols-outlined absolute left-3 text-on-surface-variant group-hover:text-on-surface transition-colors pointer-events-none">search</span>
               <input 
-                className="w-full bg-transparent border-none outline-none text-on-surface placeholder-on-surface-variant/60 text-body-md font-body-md ml-space-xs" 
+                type="text" 
                 placeholder="Títulos, géneros..." 
-                type="search" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-surface-container-high border border-transparent focus:border-white/20 focus:bg-surface-container-highest rounded-full py-1.5 pl-10 pr-4 text-sm font-body-sm text-on-surface placeholder:text-on-surface-variant/70 outline-none w-64 transition-all duration-300"
               />
-            </div>
+            </form>
           </div>
           <button aria-label="Notificaciones" className="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors relative" type="button">
             <span className="material-symbols-outlined select-none">notifications</span>
