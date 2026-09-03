@@ -11,8 +11,8 @@ export default function MediaCard({ item, coverImage, onClick, isFolder = false 
   const [tmdbData, setTmdbData] = useState<any>(null);
 
   useEffect(() => {
-    if (!isFolder && !coverImage) {
-      // Intentar obtener datos de TMDB solo si es un archivo de video y no tiene portada manual
+    if (!coverImage) {
+      // Intentar obtener datos de TMDB (tanto para videos como para carpetas)
       fetch(`/api/tmdb?filename=${encodeURIComponent(item.name)}`)
         .then(res => {
           if (res.ok) return res.json();
@@ -25,7 +25,7 @@ export default function MediaCard({ item, coverImage, onClick, isFolder = false 
         })
         .catch(err => console.error("Error fetching TMDB data for card:", err));
     }
-  }, [item.name, isFolder, coverImage]);
+  }, [item.name, coverImage]);
   
   // Decide image source
   let imageUrl = '';
