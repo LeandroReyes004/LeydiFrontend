@@ -201,7 +201,14 @@ export default function VideoPlayerPage() {
           ) : (
             <Hero 
               movie={featuredMovie} 
-              onPlayClick={(movie) => handleItemClick(movie)}
+              onPlayClick={(movie) => {
+                if (movie.mimeType === 'application/vnd.google-apps.folder') {
+                  handleItemClick(movie);
+                } else {
+                  setSelectedMovie(movie);
+                  setIsPlaying(true);
+                }
+              }}
               onInfoClick={(movie) => handleItemClick(movie)}
             />
           )}
