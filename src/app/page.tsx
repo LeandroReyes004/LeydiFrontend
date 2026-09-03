@@ -17,6 +17,8 @@ export default function VideoPlayerPage() {
   const [selectedMovie, setSelectedMovie] = useState<any | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [featuredMovie, setFeaturedMovie] = useState<any | null>(null);
+  const [heroCandidates, setHeroCandidates] = useState<any[]>([]);
+  const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -63,7 +65,9 @@ export default function VideoPlayerPage() {
             });
             
             if (candidates.length > 0) {
+              setHeroCandidates(candidates);
               const randomIndex = Math.floor(Math.random() * candidates.length);
+              setCurrentHeroIndex(randomIndex);
               setFeaturedMovie(candidates[randomIndex]);
             } else {
               setFeaturedMovie(null);
@@ -80,6 +84,21 @@ export default function VideoPlayerPage() {
       setLoading(false);
     }
   }, [currentFolderId]);
+
+  // Efecto para rotar el Hero automáticamente cada 10 segundos
+  useEffect(() => {
+    if (heroCandidates.length > 1 && !selectedMovie && !isPlaying) {
+      const interval = setInterval(() => {
+        setCurrentHeroIndex((prevIndex) => {
+          const nextIndex = (prevIndex + 1) % heroCandidates.length;
+          setFeaturedMovie(heroCandidates[nextIndex]);
+          return nextIndex;
+        });
+      }, 10000); // 10 segundos
+      
+      return () => clearInterval(interval);
+    }
+  }, [heroCandidates, selectedMovie, isPlaying]);
 
   const handleTimeUpdate = () => {
     if (videoRef.current && selectedMovie) {
