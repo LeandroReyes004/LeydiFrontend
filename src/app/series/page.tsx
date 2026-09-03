@@ -13,12 +13,13 @@ export default function SeriesPage() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/backend/api/movies/${ROOT_DRIVE_FOLDER_ID}`)
+    fetch(`/api/catalog`)
       .then((res) => res.json())
       .then((data) => {
-        // Filtrar solo Series/Colecciones (carpetas)
+        // Filtrar solo Series/Colecciones (usando el catálogo inteligente)
         const filtered = (data || []).filter((item: any) => {
-          return item.mimeType === 'application/vnd.google-apps.folder';
+          if (!item.tmdbData) return false;
+          return item.tmdbData.mediaType === 'tv';
         }).sort((a: any, b: any) => a.name.localeCompare(b.name));
 
         setItems(filtered);

@@ -13,15 +13,13 @@ export default function PeliculasPage() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/backend/api/movies/${ROOT_DRIVE_FOLDER_ID}`)
+    fetch(`/api/catalog`)
       .then((res) => res.json())
       .then((data) => {
-        // Filtrar solo películas (archivos de video, ignorando carpetas e imágenes)
+        // Filtrar solo películas (usando el catálogo inteligente)
         const filtered = (data || []).filter((item: any) => {
-          if (item.mimeType === 'application/vnd.google-apps.folder') return false;
-          if (item.name.toLowerCase().includes('portada')) return false;
-          if (item.mimeType?.startsWith('image/')) return false;
-          return true;
+          if (!item.tmdbData) return false;
+          return item.tmdbData.mediaType === 'movie';
         }).sort((a: any, b: any) => a.name.localeCompare(b.name));
 
         setItems(filtered);

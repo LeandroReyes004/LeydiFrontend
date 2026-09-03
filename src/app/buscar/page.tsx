@@ -17,7 +17,7 @@ function SearchResultsContent() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/backend/api/movies/${ROOT_DRIVE_FOLDER_ID}`)
+    fetch(`/api/catalog`)
       .then((res) => res.json())
       .then((data) => {
         const sortedData = (data || []).sort((a: any, b: any) => {
@@ -28,14 +28,17 @@ function SearchResultsContent() {
           return a.name.localeCompare(b.name);
         });
         
-        // Filtrar por búsqueda
+        // Filtrar por búsqueda (nombre o géneros)
         const q = query.toLowerCase();
         const filtered = sortedData.filter((item: any) => {
-          // Ignorar archivos de portada y elementos que no sean video/carpetas
-          if (item.name.toLowerCase().includes('portada')) return false;
-          if (item.mimeType?.startsWith('image/')) return false;
+          const titleMatch = item.name.toLowerCase().includes(q) || 
+                             (item.tmdbData?.title && item.tmdbData.title.toLowerCase().includes(q));
           
-          return item.name.toLowerCase().includes(q);
+          const genreMatch = item.tmdbData?.genres?.some((genre: any) => 
+            genre.name.toLowerCase().includes(q)
+          );
+          
+          return titleMatch || genreMatch;
         });
 
         setItems(filtered);
