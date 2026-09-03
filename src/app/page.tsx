@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Hero from '@/components/Hero';
 import MediaRow from '@/components/MediaRow';
+import MovieDetail from '@/components/MovieDetail';
 
 const ROOT_DRIVE_FOLDER_ID = "14cNucDHdxuThs5OuJok_jSgWbzKuS3oA";
 
@@ -14,6 +15,7 @@ export default function VideoPlayerPage() {
   
   const [items, setItems] = useState<any[]>([]);
   const [selectedMovie, setSelectedMovie] = useState<any | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [featuredMovie, setFeaturedMovie] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   
@@ -102,9 +104,10 @@ export default function VideoPlayerPage() {
       setFolderHistory([...folderHistory, { id: currentFolderId, name: item.name }]);
       setCurrentFolderId(item.id);
       setSelectedMovie(null);
+      setIsPlaying(false);
     } else {
       setSelectedMovie(item);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setIsPlaying(false);
     }
   };
 
@@ -144,45 +147,50 @@ export default function VideoPlayerPage() {
 
       <main className="w-full pt-16 bg-surface-container-lowest min-h-screen">
         <div className="flex flex-col w-full">
-          {/* Hero Section / Reproductor Principal */}
-          {selectedMovie ? (
-            <section className="relative w-full -mt-16 pt-24 pb-8 min-h-[60vh] flex flex-col items-center justify-center bg-surface-container-lowest">
-              <div className="w-full max-w-5xl aspect-video bg-black rounded-xl overflow-hidden shadow-[0_0_50px_rgba(255,82,97,0.15)] ring-1 ring-white/10 relative z-10">
-                <video 
-                  ref={videoRef}
-                  key={selectedMovie.id} 
-                  controls 
-                  controlsList="nodownload"
-                  onContextMenu={(e) => e.preventDefault()}
-                  className="w-full h-full object-contain"
-                  autoPlay
-                  onTimeUpdate={handleTimeUpdate}
-                  onLoadedMetadata={handleLoadedMetadata}
-                >
-                  <source src={`/backend/api/stream/${selectedMovie.id}`} type="video/mp4" />
-                  Tu navegador no soporta la etiqueta de video.
-                </video>
-              </div>
-              <div className="max-w-5xl w-full mt-6 px-4">
-                <h1 className="font-headline-xl text-headline-xl text-on-surface">{selectedMovie.name}</h1>
-                <span className="inline-block mt-2 bg-primary-container/20 text-primary-container px-3 py-1 rounded-full text-sm font-bold tracking-widest uppercase">
-                  Reproduciendo ahora
-                </span>
-                <button onClick={() => setSelectedMovie(null)} className="ml-4 text-on-surface-variant hover:text-on-surface underline text-sm">
-                  Cerrar Reproductor
-                </button>
-              </div>
-            </section>
+          
+          {/* Fullscreen Video Player */}
+          {isPlaying && selectedMovie && (
+            <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center">
+              <video 
+                ref={videoRef}
+                key={selectedMovie.id} 
+                controls 
+                controlsList="nodownload"
+                onContextMenu={(e) => e.preventDefault()}
+                className="w-full h-full object-contain"
+                autoPlay
+                onTimeUpdate={handleTimeUpdate}
+                onLoadedMetadata={handleLoadedMetadata}
+              >
+                <source src={`/backend/api/stream/${selectedMovie.id}`} type="video/mp4" />
+                Tu navegador no soporta la etiqueta de video.
+              </video>
+              <button 
+                onClick={() => setIsPlaying(false)} 
+                className="absolute top-4 left-4 z-[101] bg-surface-container-highest/80 backdrop-blur text-on-surface hover:bg-primary-container hover:text-on-primary px-4 py-2 rounded-full font-bold flex items-center gap-2 transition-colors"
+              >
+                <span className="material-symbols-outlined">arrow_back</span> Salir
+              </button>
+            </div>
+          )}
+
+          {/* Hero Section / Movie Detail */}
+          {selectedMovie && !isPlaying ? (
+            <MovieDetail 
+              movie={selectedMovie} 
+              onPlayClick={() => setIsPlaying(true)} 
+              onClose={() => setSelectedMovie(null)} 
+            />
           ) : (
             <Hero 
               movie={featuredMovie} 
-              onPlayClick={handleItemClick}
-              onInfoClick={() => {}}
+              onPlayClick={(movie) => handleItemClick(movie)}
+              onInfoClick={(movie) => handleItemClick(movie)}
             />
           )}
 
           {/* Contenido Principal (Filas al estilo Netflix) */}
-          <div className="relative z-20 flex flex-col gap-space-3xl px-gutter-mobile md:px-gutter-tablet lg:px-gutter-desktop py-space-xl">
+          <div className={`relative z-20 flex flex-col gap-space-3xl px-gutter-mobile md:px-gutter-tablet lg:px-gutter-desktop py-space-xl ${selectedMovie && !isPlaying ? 'hidden' : ''}`}>
             {currentFolderId === "YOUR_GOOGLE_DRIVE_FOLDER_ID" ? (
               <div className="text-center p-12 text-on-surface-variant">
                 ⚠️ Por favor, pon el ID de tu carpeta principal en el código.

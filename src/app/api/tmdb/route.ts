@@ -42,7 +42,39 @@ export async function GET(request: Request) {
     const data = await res.json();
     if (data.results && data.results.length > 0) {
       const bestMatch = data.results.find((item: any) => item.media_type === 'movie' || item.media_type === 'tv') || data.results[0];
+      const mediaType = bestMatch.media_type || 'movie';
+      const id = bestMatch.id;
+
+      // 2nd Request: Fetch full details including cast and videos
+      const detailsUrl = isV4Token
+        ? `${TMDB_BASE_URL}/${mediaType}/${id}?language=es-ES&append_to_response=credits,videos`
+        : `${TMDB_BASE_URL}/${mediaType}/${id}?api_key=${TMDB_API_KEY}&language=es-ES&append_to_response=credits,videos`;
+        
+      try {
+        const detailsRes = await fetch(detailsUrl, { headers });
+        if (detailsRes.ok) {
+          const detailsData = await detailsRes.json();
+          
+          return NextResponse.json({
+            id: id,
+            title: detailsData.title || detailsData.name,
+            overview: detailsData.overview,
+            posterPath: detailsData.poster_path ? `https://image.tmdb.org/t/p/w500${detailsData.poster_path}` : null,
+            backdropPath: detailsData.backdrop_path ? `https://image.tmdb.org/t/p/original${detailsData.backdrop_path}` : null,
+            voteAverage: detailsData.vote_average,
+            releaseDate: detailsData.release_date || detailsData.first_air_date,
+            mediaType: mediaType,
+            runtime: detailsData.runtime || (detailsData.episode_run_time && detailsData.episode_run_time[0]),
+            genres: detailsData.genres,
+            credits: detailsData.credits,
+            videos: detailsData.videos
+          });
+        }
+      } catch (e) {
+        console.error("Failed to fetch TMDB details, falling back to basic data", e);
+      }
       
+      // Fallback to basic search data if details fetch fails
       return NextResponse.json({
         id: bestMatch.id,
         title: bestMatch.title || bestMatch.name,
@@ -51,7 +83,7 @@ export async function GET(request: Request) {
         backdropPath: bestMatch.backdrop_path ? `https://image.tmdb.org/t/p/original${bestMatch.backdrop_path}` : null,
         voteAverage: bestMatch.vote_average,
         releaseDate: bestMatch.release_date || bestMatch.first_air_date,
-        mediaType: bestMatch.media_type || 'movie'
+        mediaType: mediaType
       });
     } else {
       return NextResponse.json({ error: 'No results found' }, { status: 404 });
