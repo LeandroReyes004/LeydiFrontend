@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface MediaCardProps {
   item: any;
@@ -8,17 +8,38 @@ interface MediaCardProps {
 }
 
 export default function MediaCard({ item, coverImage, onClick, isFolder = false }: MediaCardProps) {
+  const [tmdbData, setTmdbData] = useState<any>(null);
+
+  useEffect(() => {
+    if (!isFolder && !coverImage) {
+      // Intentar obtener datos de TMDB solo si es un archivo de video y no tiene portada manual
+      fetch(`/api/tmdb?filename=${encodeURIComponent(item.name)}`)
+        .then(res => {
+          if (res.ok) return res.json();
+          return null;
+        })
+        .then(data => {
+          if (data && !data.error) {
+            setTmdbData(data);
+          }
+        })
+        .catch(err => console.error("Error fetching TMDB data for card:", err));
+    }
+  }, [item.name, isFolder, coverImage]);
   
   // Decide image source
   let imageUrl = '';
   if (coverImage) {
-    imageUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/stream/${coverImage.id}`;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    imageUrl = `${apiUrl}/api/stream/${coverImage.id}`;
+  } else if (tmdbData?.posterPath) {
+    imageUrl = tmdbData.posterPath;
   } else if (item.thumbnailLink) {
     imageUrl = item.thumbnailLink;
   }
 
-  const title = isFolder ? item.name : item.name.replace(/\.[^/.]+$/, "");
-  const subtitle = isFolder ? "Carpeta" : `${(parseInt(item.size || 0) / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+  const title = tmdbData?.title || (isFolder ? item.name : item.name.replace(/\.[^/.]+$/, ""));
+  const subtitle = isFolder ? "Carpeta" : (tmdbData?.releaseDate ? tmdbData.releaseDate.substring(0,4) : `${(parseInt(item.size || 0) / (1024 * 1024 * 1024)).toFixed(2)} GB`);
 
   return (
     <div 
@@ -50,8 +71,14 @@ export default function MediaCard({ item, coverImage, onClick, isFolder = false 
 
         {/* Top badge */}
         <span className="absolute top-2 left-2 bg-surface-container-lowest/80 backdrop-blur-md px-2 py-0.5 rounded text-on-surface font-label-badge text-label-badge">
-          {isFolder ? 'Colección' : 'Película'}
+          {isFolder ? 'Colección' : (tmdbData?.mediaType === 'tv' ? 'Serie' : 'Película')}
         </span>
+        {tmdbData?.voteAverage && (
+          <span className="absolute top-2 right-2 flex items-center gap-1 bg-surface-container-lowest/80 backdrop-blur-md px-2 py-0.5 rounded text-secondary font-label-badge text-label-badge font-bold">
+            <span className="material-symbols-outlined text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+            {tmdbData.voteAverage.toFixed(1)}
+          </span>
+        )}
       </div>
       
       {/* Progress Bar (fake for now, can be hooked to localStorage later) */}

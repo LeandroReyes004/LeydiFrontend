@@ -1,0 +1,54 @@
+import { NextResponse } from 'next/server';
+import { cleanMovieTitle } from '@/lib/tmdb';
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const filename = searchParams.get('filename');
+
+  if (!filename) {
+    return NextResponse.json({ error: 'Filename is required' }, { status: 400 });
+  }
+
+  const TMDB_API_KEY = process.env.TMDB_API_KEY || process.env.NEXT_PUBLIC_TMDB_API_KEY;
+  const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+
+  if (!TMDB_API_KEY || TMDB_API_KEY === 'AQUI_TU_API_KEY') {
+    return NextResponse.json({ error: 'No TMDB API key configured' }, { status: 404 });
+  }
+
+  const cleanTitle = cleanMovieTitle(filename);
+  if (!cleanTitle) {
+    return NextResponse.json({ error: 'Could not clean title' }, { status: 400 });
+  }
+
+  try {
+    const res = await fetch(
+      `${TMDB_BASE_URL}/search/multi?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(cleanTitle)}&language=es-ES&page=1`
+    );
+    
+    if (!res.ok) {
+      return NextResponse.json({ error: 'Failed to fetch from TMDB' }, { status: res.status });
+    }
+    
+    const data = await res.json();
+    if (data.results && data.results.length > 0) {
+      const bestMatch = data.results.find((item: any) => item.media_type === 'movie' || item.media_type === 'tv') || data.results[0];
+      
+      return NextResponse.json({
+        id: bestMatch.id,
+        title: bestMatch.title || bestMatch.name,
+        overview: bestMatch.overview,
+        posterPath: bestMatch.poster_path ? `https://image.tmdb.org/t/p/w500${bestMatch.poster_path}` : null,
+        backdropPath: bestMatch.backdrop_path ? `https://image.tmdb.org/t/p/original${bestMatch.backdrop_path}` : null,
+        voteAverage: bestMatch.vote_average,
+        releaseDate: bestMatch.release_date || bestMatch.first_air_date,
+        mediaType: bestMatch.media_type || 'movie'
+      });
+    } else {
+      return NextResponse.json({ error: 'No results found' }, { status: 404 });
+    }
+  } catch (error) {
+    console.error("TMDB proxy error:", error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}

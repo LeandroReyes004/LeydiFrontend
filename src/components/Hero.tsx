@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface HeroProps {
   movie: any | null;
@@ -7,6 +7,24 @@ interface HeroProps {
 }
 
 export default function Hero({ movie, onPlayClick, onInfoClick }: HeroProps) {
+  const [tmdbData, setTmdbData] = useState<any>(null);
+
+  useEffect(() => {
+    if (movie && !movie.isCoverOnly) {
+      fetch(`/api/tmdb?filename=${encodeURIComponent(movie.name)}`)
+        .then(res => {
+          if (res.ok) return res.json();
+          return null;
+        })
+        .then(data => {
+          if (data && !data.error) {
+            setTmdbData(data);
+          }
+        })
+        .catch(err => console.error("Error fetching TMDB data for hero:", err));
+    }
+  }, [movie]);
+
   if (!movie) {
     return (
       <div className="relative w-full overflow-hidden">
@@ -23,7 +41,7 @@ export default function Hero({ movie, onPlayClick, onInfoClick }: HeroProps) {
 
   const bgImageUrl = movie.isCoverOnly 
     ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/stream/${movie.id}`
-    : (movie.thumbnailLink ? movie.thumbnailLink.replace('=s220', '=s1000') : '');
+    : (tmdbData?.backdropPath || (movie.thumbnailLink ? movie.thumbnailLink.replace('=s220', '=s1000') : ''));
 
   return (
     <div className="relative w-full overflow-hidden">
@@ -68,17 +86,17 @@ export default function Hero({ movie, onPlayClick, onInfoClick }: HeroProps) {
             <div className="flex flex-col gap-space-xxs">
               <span className="font-label-badge text-label-badge text-primary-container tracking-widest uppercase font-extrabold flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-primary-container animate-ping"></span>
-                Destacado
+                Destacado {tmdbData?.releaseDate && `(${tmdbData.releaseDate.substring(0,4)})`}
               </span>
               <h1 className="font-display-hero text-display-hero-mobile md:text-display-hero text-on-surface tracking-tight drop-shadow-2xl">
-                {movie.name}
+                {tmdbData?.title || movie.name.replace(/\.[^/.]+$/, "")}
               </h1>
             </div>
             
             {/* Synopsis */}
             {!movie.isCoverOnly && (
               <p className="font-body-lg text-body-lg text-on-surface-variant line-clamp-3 md:line-clamp-none max-w-2xl drop-shadow">
-                Una película increíble seleccionada para ti desde tu servidor privado. Disfruta de la mejor calidad sin interrupciones.
+                {tmdbData?.overview || 'Una película increíble seleccionada para ti desde tu servidor privado. Disfruta de la mejor calidad sin interrupciones.'}
               </p>
             )}
 
