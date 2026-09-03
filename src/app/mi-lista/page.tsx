@@ -212,41 +212,7 @@ export default function MiListaPage() {
             )
           )}
 
-          {/* Sync & Capacity Widget */}
-          <div className="w-full bg-surface-container-low border border-white/5 rounded-2xl p-space-xl mb-space-3xl flex flex-col md:flex-row items-center justify-between gap-space-xl relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-1 h-full bg-tertiary-container"></div>
-            <div className="flex flex-col z-10 max-w-xl">
-              <span className="text-tertiary-container font-label-badge text-xs font-bold uppercase tracking-widest mb-2 flex items-center gap-2">
-                <span className="material-symbols-outlined text-sm">cloud_sync</span>
-                Sincronización Cloud Offline
-              </span>
-              <h3 className="font-headline-md text-2xl font-bold text-on-surface mb-2">Capacidad de descargas en este equipo</h3>
-              <p className="text-on-surface-variant">
-                {savedItems.length} títulos guardados en caché disponibles para reproducción en modo viaje o sin conexión a red.
-              </p>
-            </div>
 
-            <div className="flex flex-col w-full md:w-auto md:min-w-[400px] z-10">
-              <div className="flex justify-between items-end mb-2 font-label-md text-xs font-bold">
-                <span className="text-on-surface">14.8 GB usados</span>
-                <span className="text-on-surface-variant">64.0 GB asignados</span>
-              </div>
-              <div className="w-full h-3 bg-surface-container-highest rounded-full overflow-hidden flex mb-3">
-                <div className="h-full bg-primary-container" style={{ width: '45%' }}></div>
-                <div className="h-full bg-secondary-container" style={{ width: '15%' }}></div>
-              </div>
-              <div className="flex items-center gap-4 text-xs font-label-md text-on-surface-variant">
-                <div className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-primary-container"></span>
-                  Películas (11.2 GB)
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-secondary-container"></span>
-                  Series (3.6 GB)
-                </div>
-              </div>
-            </div>
-          </div>
           
         </div>
       </main>
