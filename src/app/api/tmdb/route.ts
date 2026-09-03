@@ -22,9 +22,18 @@ export async function GET(request: Request) {
   }
 
   try {
-    const res = await fetch(
-      `${TMDB_BASE_URL}/search/multi?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(cleanTitle)}&language=es-ES&page=1`
-    );
+    const isV4Token = TMDB_API_KEY.includes('.');
+    const authHeader = isV4Token ? { 'Authorization': `Bearer ${TMDB_API_KEY}` } : {};
+    const url = isV4Token 
+      ? `${TMDB_BASE_URL}/search/multi?query=${encodeURIComponent(cleanTitle)}&language=es-ES&page=1`
+      : `${TMDB_BASE_URL}/search/multi?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(cleanTitle)}&language=es-ES&page=1`;
+
+    const res = await fetch(url, {
+      headers: {
+        'accept': 'application/json',
+        ...authHeader
+      }
+    });
     
     if (!res.ok) {
       return NextResponse.json({ error: 'Failed to fetch from TMDB' }, { status: res.status });
