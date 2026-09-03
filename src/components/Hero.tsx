@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { isInMyList, toggleMyList } from '@/lib/listUtils';
 
 interface HeroProps {
   movie: any | null;
@@ -8,6 +9,19 @@ interface HeroProps {
 
 export default function Hero({ movie, onPlayClick, onInfoClick }: HeroProps) {
   const [tmdbData, setTmdbData] = useState<any>(null);
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    if (!movie) return;
+    setIsSaved(isInMyList(movie.id));
+    
+    const handleListUpdate = () => {
+      setIsSaved(isInMyList(movie.id));
+    };
+    
+    window.addEventListener('cinestream_list_updated', handleListUpdate);
+    return () => window.removeEventListener('cinestream_list_updated', handleListUpdate);
+  }, [movie?.id]);
 
   useEffect(() => {
     if (movie && !movie.isCoverOnly) {
@@ -117,11 +131,18 @@ export default function Hero({ movie, onPlayClick, onInfoClick }: HeroProps) {
                   <span className="material-symbols-outlined text-xl">info</span>
                   <span>Más información</span>
                 </button>
-                <button aria-label="Añadir a mi lista" className="w-11 h-11 rounded-full bg-surface-container-highest/60 backdrop-blur-md flex items-center justify-center text-on-surface hover:text-primary-container hover:bg-surface-container-highest transition-all duration-200 active:scale-90">
-                  <span className="material-symbols-outlined text-xl">add</span>
-                </button>
-                <button aria-label="Calificar" className="w-11 h-11 rounded-full bg-surface-container-highest/60 backdrop-blur-md flex items-center justify-center text-on-surface hover:text-secondary hover:bg-surface-container-highest transition-all duration-200 active:scale-90">
-                  <span className="material-symbols-outlined text-xl">thumb_up</span>
+                <button 
+                  onClick={() => toggleMyList(movie, tmdbData)}
+                  className={`px-space-lg py-space-sm rounded-lg flex items-center justify-center gap-space-xxs transition-colors ${
+                    isSaved 
+                      ? 'bg-primary-container/20 text-primary-container border border-primary-container/50' 
+                      : 'bg-surface-container-highest/70 backdrop-blur-md text-on-surface hover:bg-surface-container-highest'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-xl" style={isSaved ? { fontVariationSettings: "'FILL' 1" } : {}}>
+                    {isSaved ? 'bookmark_added' : 'bookmark_add'}
+                  </span>
+                  <span>{isSaved ? 'En Mi Lista' : 'Mi Lista'}</span>
                 </button>
               </div>
             )}

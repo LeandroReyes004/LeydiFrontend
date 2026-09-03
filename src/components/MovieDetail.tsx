@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { isInMyList, toggleMyList } from '@/lib/listUtils';
 
 interface MovieDetailProps {
   movie: any;
@@ -10,6 +11,18 @@ export default function MovieDetail({ movie, onPlayClick, onClose }: MovieDetail
   const [activeTab, setActiveTab] = useState<'similares' | 'trailers' | 'tecnicos'>('similares');
   const [tmdbData, setTmdbData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    setIsSaved(isInMyList(movie.id));
+    
+    const handleListUpdate = () => {
+      setIsSaved(isInMyList(movie.id));
+    };
+    
+    window.addEventListener('cinestream_list_updated', handleListUpdate);
+    return () => window.removeEventListener('cinestream_list_updated', handleListUpdate);
+  }, [movie.id]);
 
   useEffect(() => {
     // Scroll to top when mounted
@@ -114,9 +127,18 @@ export default function MovieDetail({ movie, onPlayClick, onClose }: MovieDetail
               )}
               
               <div className="grid grid-cols-2 gap-space-xs mt-space-xxs">
-                <button className="bg-surface-container/70 hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-md text-label-md py-space-xs px-space-sm rounded-lg flex items-center justify-center gap-space-xxs transition-colors">
-                  <span className="material-symbols-outlined text-base">bookmark_add</span>
-                  <span>Mi Lista</span>
+                <button 
+                  onClick={() => toggleMyList(movie, tmdbData)}
+                  className={`py-space-xs px-space-sm rounded-lg flex items-center justify-center gap-space-xxs transition-colors ${
+                    isSaved 
+                      ? 'bg-primary-container/20 text-primary-container border border-primary-container/50' 
+                      : 'bg-surface-container/70 hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-base" style={isSaved ? { fontVariationSettings: "'FILL' 1" } : {}}>
+                    {isSaved ? 'bookmark_added' : 'bookmark_add'}
+                  </span>
+                  <span>{isSaved ? 'En Mi Lista' : 'Mi Lista'}</span>
                 </button>
                 <button className="bg-surface-container/70 hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-md text-label-md py-space-xs px-space-sm rounded-lg flex items-center justify-center gap-space-xxs transition-colors">
                   <span className="material-symbols-outlined text-base">download_for_offline</span>

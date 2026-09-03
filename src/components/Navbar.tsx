@@ -23,7 +23,7 @@ export default function Navbar() {
             <Link href="#" className="font-title-sm text-title-sm text-on-surface-variant hover:text-on-surface transition-colors">Películas</Link>
             <Link href="#" className="font-title-sm text-title-sm text-on-surface-variant hover:text-on-surface transition-colors">Series</Link>
             <Link href="#" className="font-title-sm text-title-sm text-on-surface-variant hover:text-on-surface transition-colors">Novedades</Link>
-            <Link href="#" className="font-title-sm text-title-sm text-on-surface-variant hover:text-on-surface transition-colors">Mi Lista</Link>
+            <Link href="/mi-lista" className="font-title-sm text-title-sm text-on-surface-variant hover:text-on-surface transition-colors">Mi Lista</Link>
           </nav>
         </div>
         <div className="flex items-center gap-space-md">
