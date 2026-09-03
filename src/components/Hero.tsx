@@ -40,7 +40,7 @@ export default function Hero({ movie, onPlayClick, onInfoClick }: HeroProps) {
   }
 
   const bgImageUrl = movie.isCoverOnly 
-    ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/stream/${movie.id}`
+    ? `/backend/api/stream/${movie.id}`
     : (tmdbData?.backdropPath || (movie.thumbnailLink ? movie.thumbnailLink.replace('=s220', '=s1000') : ''));
 
   return (

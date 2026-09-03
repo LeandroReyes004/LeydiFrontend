@@ -30,8 +30,7 @@ export default function MediaCard({ item, coverImage, onClick, isFolder = false 
   // Decide image source
   let imageUrl = '';
   if (coverImage) {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    imageUrl = `${apiUrl}/api/stream/${coverImage.id}`;
+    imageUrl = `/backend/api/stream/${coverImage.id}`;
   } else if (tmdbData?.posterPath) {
     imageUrl = tmdbData.posterPath;
   } else if (item.thumbnailLink) {

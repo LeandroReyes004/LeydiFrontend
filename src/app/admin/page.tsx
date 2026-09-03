@@ -28,8 +28,7 @@ export default function AdminPage() {
     formData.append('cover', file);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const res = await fetch(`${apiUrl}/api/upload-cover/${folderId}`, {
+      const res = await fetch(`/backend/api/upload-cover/${folderId}`, {
         method: 'POST',
         body: formData,
       });

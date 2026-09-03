@@ -22,8 +22,8 @@ export default function VideoPlayerPage() {
   useEffect(() => {
     setLoading(true);
     if (currentFolderId !== "YOUR_GOOGLE_DRIVE_FOLDER_ID") {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      fetch(`${apiUrl}/api/movies/${currentFolderId}`)
+      // Usamos el proxy de Next.js para evitar el bloqueo de Mixed Content
+      fetch(`/backend/api/movies/${currentFolderId}`)
         .then((res) => res.json())
         .then((data) => {
           const sortedData = (data || []).sort((a: any, b: any) => {
@@ -159,7 +159,7 @@ export default function VideoPlayerPage() {
                   onTimeUpdate={handleTimeUpdate}
                   onLoadedMetadata={handleLoadedMetadata}
                 >
-                  <source src={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/stream/${selectedMovie.id}`} type="video/mp4" />
+                  <source src={`/backend/api/stream/${selectedMovie.id}`} type="video/mp4" />
                   Tu navegador no soporta la etiqueta de video.
                 </video>
               </div>
