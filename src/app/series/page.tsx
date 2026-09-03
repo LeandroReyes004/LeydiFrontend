@@ -16,10 +16,11 @@ export default function SeriesPage() {
     fetch(`/backend/api/catalog/${ROOT_DRIVE_FOLDER_ID}`)
       .then((res) => res.json())
       .then((data) => {
-        // Filtrar solo Series/Colecciones (usando el catálogo inteligente)
+        // Filtrar Series/Colecciones (carpetas o si TMDB dice que es TV)
         const filtered = (data || []).filter((item: any) => {
-          if (!item.tmdbData) return false;
-          return item.tmdbData.mediaType === 'tv';
+          if (item.tmdbData && item.tmdbData.mediaType === 'tv') return true;
+          if (item.mimeType === 'application/vnd.google-apps.folder') return true;
+          return false;
         }).sort((a: any, b: any) => a.name.localeCompare(b.name));
 
         setItems(filtered);

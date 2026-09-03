@@ -16,10 +16,16 @@ export default function PeliculasPage() {
     fetch(`/backend/api/catalog/${ROOT_DRIVE_FOLDER_ID}`)
       .then((res) => res.json())
       .then((data) => {
-        // Filtrar solo películas (usando el catálogo inteligente)
+        // Filtrar películas (archivos de video, ignorar carpetas/imágenes/series)
         const filtered = (data || []).filter((item: any) => {
-          if (!item.tmdbData) return false;
-          return item.tmdbData.mediaType === 'movie';
+          if (item.mimeType === 'application/vnd.google-apps.folder') return false;
+          if (item.mimeType?.startsWith('image/')) return false;
+          if (item.name.toLowerCase().includes('portada')) return false;
+          
+          // Si TMDB dice que es serie, lo ocultamos de películas
+          if (item.tmdbData && item.tmdbData.mediaType === 'tv') return false;
+          
+          return true;
         }).sort((a: any, b: any) => a.name.localeCompare(b.name));
 
         setItems(filtered);
