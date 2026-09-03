@@ -13,7 +13,7 @@ export default function SeriesPage() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/catalog`)
+    fetch(`/backend/api/catalog/${ROOT_DRIVE_FOLDER_ID}`)
       .then((res) => res.json())
       .then((data) => {
         // Filtrar solo Series/Colecciones (usando el catálogo inteligente)

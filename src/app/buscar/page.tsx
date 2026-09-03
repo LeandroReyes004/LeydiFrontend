@@ -17,7 +17,7 @@ function SearchResultsContent() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/catalog`)
+    fetch(`/backend/api/catalog/${ROOT_DRIVE_FOLDER_ID}`)
       .then((res) => res.json())
       .then((data) => {
         const sortedData = (data || []).sort((a: any, b: any) => {
